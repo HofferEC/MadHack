@@ -36,3 +36,11 @@ Many team members were able to effectively complete tasks we had no previous exp
 ## What's next for DJ Lil Lex
 
 Future improves would include counting syllables so that couplets and stanzas have uniform length. We would include options for language filtering. We would include more variance in the rhyming schemes. We would also try to standardize the rate at which Alexa reads the output so that she would read lines "on beat". 
+
+## Authors
+
+Caleb Floyd    |  ctfloyd@wisc.edu
+Tim Schabel    |  tschabel@wisc.edu
+Nicholas Hoff  |  nbhoff@wisc.edu
+
+#Developed in 24 hours for Madhacks Fall 2018 Hackathon
