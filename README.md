@@ -39,8 +39,8 @@ Future improves would include counting syllables so that couplets and stanzas ha
 
 ## Authors
 
-Caleb Floyd    |  ctfloyd@wisc.edu
-Tim Schabel    |  tschabel@wisc.edu
-Nicholas Hoff  |  nbhoff@wisc.edu
+Caleb Floyd : ctfloyd@wisc.edu   
+Tim Schabel : tschabel@wisc.edu   
+Nicholas Hoff : nbhoff@wisc.edu   
 
-#Developed in 24 hours for Madhacks Fall 2018 Hackathon
+# Developed in 24 hours for Madhacks Fall 2018 Hackathon
