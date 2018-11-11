@@ -66,7 +66,7 @@ for word in relatedWords:
 
 def get_line(keyword):
     page = requests.get(
-        "https://search.azlyrics.com/search.php?q=" + keyword + "&w=songs&p=1"
+        "https://search.azlyrics.com/search.php?q=" + keyword + "&w=songs&p=1", headers={'User-Agent':"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.112 Safari/534.30"}
     )
     soup = BeautifulSoup(page.text, "html.parser")
     song_list = soup.find_all("a")
@@ -78,7 +78,7 @@ def get_line(keyword):
 
     random.shuffle(valid_songs)
     for newSong in valid_songs:
-        new_page = requests.get(newSong)
+        new_page = requests.get(newSong, headers={'User-Agent':"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.112 Safari/534.30"})
         new_soup = BeautifulSoup(new_page.text, "html.parser")
         lyrics = new_soup.find_all("div")[21]
         filtered_lyrics = lyrics.text.replace("<\br>", "")
@@ -87,7 +87,6 @@ def get_line(keyword):
         for value in filtered_lyrics_lines:
             if value.split(" ")[-1] == keyword:
                 return value
-        time.sleep(1000)
 
 
 lines = []
