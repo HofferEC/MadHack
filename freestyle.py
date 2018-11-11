@@ -5,7 +5,7 @@ import math
 
 #pull input word from alexa command
 
-inputWord = "home"
+inputWord = "jar"
 inputHTTPS = "https://api.datamuse.com/words?ml=" + inputWord
 
 response = json.loads(requests.get(inputHTTPS).text)
@@ -75,10 +75,21 @@ for i in range (0, len(lastWords), 2):
 
 #parse SOMETHING? to develop lines ending in those given words
 
-lines = [["I'm drivin me mum's car", "Something something something far"], ["a","a"], ["b","b"], ["c","c"], ["d","d"]]
+lines = [["a1","a2"], ["b1","b2"], ["c1","c2"], ["d1","d2"], ["e1", "e2"], ["f1", "f2"]]
 
 #Put lines together into a good scheme
 
-inputWord = "car"
+out = ""
+for i in range(3):
+    j = random.randint(1,3)
+    startIndex = i*2
+    if (j == 1): #AABB
+        out = out + lines[startIndex][0] + " " + lines[startIndex][1] + " " + lines[startIndex + 1][0] + " " + lines[startIndex + 1][1] + " "
+    elif (j == 2): #ABBA
+        out = out + lines[startIndex][0] + " " + lines[startIndex + 1][0] + " " + lines[startIndex + 1][1] + " " + lines[startIndex][1] + " "
+    else: #ABAB
+        out = out + lines[startIndex][0] + " " + lines[startIndex + 1][0] + " " + lines[startIndex][1] + " " + lines[startIndex + 1][1] + " "
 
+
+print(out)
 #send output back to alexa to read out.
