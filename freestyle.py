@@ -1,95 +1,154 @@
 import requests
+from bs4 import BeautifulSoup
 import json
 import random
 import math
+import sys
+import time
+import string
+import re
 
-#pull input word from alexa command
+# pull input word from alexa command
 
-inputWord = "jar"
-inputHTTPS = "https://api.datamuse.com/words?ml=" + inputWord
+inputWord = "house"
 
-response = json.loads(requests.get(inputHTTPS).text)
-
-
-#get related words
+# get related words
 
 NUMRELATEDWORDS = 6
+TOLERANCE = 2
 
-relatedWords = [None] * NUMRELATEDWORDS
-relatedWords[0] = inputWord
-index = -1
-for x in range (1,len(relatedWords)):
-    index += random.randint(1,3)
-    #print(index)
-    while " " in  response[index]['word']:
-        index += 1
-    relatedWords[x] = response[index]['word']
 
-#find rhyming words with the above
+def writeToFile(message):
+    with open("lyrics.txt", "w") as the_file:
+        the_file.write(message)
+    sys.exit()
 
+
+def queryAPI(word, numWords, tolerance, param):
+    inputHTTPS = "https://api.datamuse.com/words?" + param + "=" + word + "&md=f"
+    response = json.loads(requests.get(inputHTTPS).text)
+    words = []
+    words.append(word)
+    index = -1
+    for x in range(1, numWords):
+        index += random.randint(1, 3)
+        # print(index))
+        try:
+            while (
+                float(response[index]["tags"][-1].replace("f:", "")) <= tolerance
+                or " " in response[index]["word"]
+            ):
+                index += 1
+            words.append(response[index]["word"])
+        except IndexError:
+            return None
+
+    return words
+
+
+relatedWords = queryAPI(inputWord, NUMRELATEDWORDS, TOLERANCE, "ml")
+if relatedWords is None:
+    writeToFile("Fail Message")
+
+
+# find rhyming words with the above
 lastWords = []
 for word in relatedWords:
-    index = -1
     lastWords.append(word)
+    rhymes = queryAPI(word, 2, TOLERANCE, "rel_rhy")
+    if rhymes is not None:
+        lastWords.append(rhymes[1])
+    else:
+        simRhymes = queryAPI(word, 2, TOLERANCE, "sl")
+        if simRhymes is not None:
+            lastWords.append(simRhymes[1])
+        else:
+            writeToFile("Fail Message")
 
-    inputHTTPS = "https://api.datamuse.com/words?rel_rhy=" + word
-    response = json.loads(requests.get(inputHTTPS).text)
 
-    # if the word as at least 5 rhymes, try to find a rhyme, otherwise find a word that sounds similar
-    if len(response) > 5:
-        index = random.randint(0, len(response)-1)
+def get_line(keyword):
+    page = requests.get(
+        "https://www.lyrics.com/serp.php?st=" + keyword + "&stype=2"
+    )
+    soup = BeautifulSoup(page.text, "html.parser")
+    lyric_list = soup.find_all("pre")
+    filtered_lyrics = []
+    filtered_lines = []
+    for lyric in lyric_list:
+        filtered_lyrics.append(lyric.text.replace("</em>", "").replace("<em>", ""))
+    for lines in filtered_lyrics:
+        filtered_lines.append(lines.split("\n"))
+    for phrase in filtered_lines:
+        for value in phrase:
+            value = re.sub(r'[^\w\s]','',value)
+            if value.split(" ")[-1].lower().rstrip() == keyword:
+                return value
 
-        counter = 0
-        while " " in response[index]['word']:
-            # if we already tried to find 5 rhymes, just find a word that sounds similar
-            if counter > 5:
-                inputHTTPS = "https://api.datamuse.com/words?sl=" + word
-                response = json.loads(requests.get(inputHTTPS).text)
-                index += random.randint(1,3)
-                while " " in  response[index]['word']:
-                    index += 1
-            # word has a space in it, find a new one
-            else:
-                index = random.randint(0, len(response)-1)
-                counter += 1
-        # add whatever word was found to the list
-        lastWords.append(response[index]['word'])
-        continue
+
+
+lines = []
+output = ""
+for word in lastWords:
+    lines.append(get_line(word))
+
+for line in lines:
     
-    # if there weren't enough rhymes, find a word that sounds similar
-    inputHTTPS = "https://api.datamuse.com/words?sl=" + word
-    response = json.loads(requests.get(inputHTTPS).text)
-    index += random.randint(1,3)
-    # if the word found has a space, find a new one
-    while " " in  response[index]['word']:
-        index += 1
-    lastWords.append(response[index]['word'])
+    if line is not None:
+        output += line + "\n"
+
+writeToFile(output)
+# lines = [
+#     ["a1", "a2"],
+#     ["b1", "b2"],
+#     ["c1", "c2"],
+#     ["d1", "d2"],
+#     ["e1", "e2"],
+#     ["f1", "f2"],
+# ]
+
+# # Put lines together into a good scheme
+
+# out = ""
+# for i in range(3):
+#     j = random.randint(1, 3)
+#     startIndex = i * 2
+#     if j == 1:  # AABB
+#         out = (
+#             out
+#             + lines[startIndex][0]
+#             + " "
+#             + lines[startIndex][1]
+#             + " "
+#             + lines[startIndex + 1][0]
+#             + " "
+#             + lines[startIndex + 1][1]
+#             + " "
+#         )
+#     elif j == 2:  # ABBA
+#         out = (
+#             out
+#             + lines[startIndex][0]
+#             + " "
+#             + lines[startIndex + 1][0]
+#             + " "
+#             + lines[startIndex + 1][1]
+#             + " "
+#             + lines[startIndex][1]
+#             + " "
+#         )
+#     else:  # ABAB
+#         out = (
+#             out
+#             + lines[startIndex][0]
+#             + " "
+#             + lines[startIndex + 1][0]
+#             + " "
+#             + lines[startIndex][1]
+#             + " "
+#             + lines[startIndex + 1][1]
+#             + " "
+#         )
 
 
-
-for i in range (0, len(lastWords), 2):
-    print(lastWords[i] + ", " + lastWords[i+1])
-
-
-#for i in range(len(relatedWords))
-
-#parse SOMETHING? to develop lines ending in those given words
-
-lines = [["a1","a2"], ["b1","b2"], ["c1","c2"], ["d1","d2"], ["e1", "e2"], ["f1", "f2"]]
-
-#Put lines together into a good scheme
-
-out = ""
-for i in range(3):
-    j = random.randint(1,3)
-    startIndex = i*2
-    if (j == 1): #AABB
-        out = out + lines[startIndex][0] + " " + lines[startIndex][1] + " " + lines[startIndex + 1][0] + " " + lines[startIndex + 1][1] + " "
-    elif (j == 2): #ABBA
-        out = out + lines[startIndex][0] + " " + lines[startIndex + 1][0] + " " + lines[startIndex + 1][1] + " " + lines[startIndex][1] + " "
-    else: #ABAB
-        out = out + lines[startIndex][0] + " " + lines[startIndex + 1][0] + " " + lines[startIndex][1] + " " + lines[startIndex + 1][1] + " "
-
-
-print(out)
-#send output back to alexa to read out.
+# print(out)
+# # send output back to alexa to read out.
