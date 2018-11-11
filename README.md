@@ -1,3 +1,5 @@
+# DJ Lil Lex
+
 ## Inspiration
 
 One of our team members is deeply enveloped in the music game. When brainstorming ideas, we soon realized that making custom Alexa skill that would automatically generate lyrics would be entertaining for both us the developers and for the end users. 
